@@ -16,10 +16,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cookieParser());
 
+// Routes imports
+const userRoutes = require("./routes/userRoutes");
+
 // Routes
 app.get("/", (req, res) => {
   return res.status(200).json("Welcome to ERR Backend");
 });
+app.use("/api/users", userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
