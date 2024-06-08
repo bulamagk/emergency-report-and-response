@@ -8,6 +8,7 @@ const {
   logout,
   changePassword,
 } = require("../controllers/adminUserController");
+const { verfiryToken } = require("../middlewares/authMiddleware");
 
 const router = require("express").Router();
 
@@ -15,19 +16,19 @@ const router = require("express").Router();
 router.post("/", createUser);
 
 // Get All Users
-router.get("/", getUsers);
+router.get("/", verfiryToken, getUsers);
 
 // Get Single User
-router.get("/:id", getUser);
+router.get("/:id", verfiryToken, getUser);
 
 // Update User
-router.put("/:id", updateUser);
+router.put("/:id", verfiryToken, updateUser);
 
 // Delete User
-router.delete("/:id", deleteUser);
+router.delete("/:id", verfiryToken, deleteUser);
 
 // Change Password
-router.post("/password/:id", changePassword);
+router.post("/password/:id", verfiryToken, changePassword);
 
 // Login User
 router.post("/login", login);
