@@ -10,7 +10,14 @@ const emergencyReportSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["Medical", "Fire", "Natural Disaster", "Accident", "Other"],
+      enum: [
+        "Medical",
+        "Fire",
+        "Natural Disaster",
+        "Accident",
+        "Robbery",
+        "Other",
+      ],
       required: true,
     },
     description: {

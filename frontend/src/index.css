@@ -22,9 +22,35 @@ button {
 }
 
 button:hover {
-  transform: scale(1.1);
+  opacity: 0.9;
 }
 
 img {
   max-width: 100%;
+}
+
+#aside.show {
+  width: 70%;
+}
+
+input {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 0.5em;
+
+  @apply text-stone-700;
+}
+
+label {
+  @apply text-stone-600;
+}
+
+.overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+@layer components {
+  .form-group {
+    @apply flex flex-col gap-2;
+  }
 }
