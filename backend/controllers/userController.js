@@ -107,10 +107,30 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Auth Users****************************************************************
+const authUser = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: "You don't have an account, please sign up!" });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Error Occured \n\n ${error.message}` });
+  }
+};
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
   updateUser,
   deleteUser,
+  authUser,
 };

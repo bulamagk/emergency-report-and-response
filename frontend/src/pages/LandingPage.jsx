@@ -1,9 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import emergencyPic from "../assets/emergency.jpg";
 import SignUp from "../components/SignUp";
 import SignIn from "../components/SignIn";
 
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const user = useSelector((state) => state.clientAuthReducer.user);
+
+  // Redirect user to report page if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/emergency");
+    }
+  }, []);
+
   const [isSignUp, setIsSignUp] = useState(false);
   const [isSignIn, setIsSignIn] = useState(false);
 

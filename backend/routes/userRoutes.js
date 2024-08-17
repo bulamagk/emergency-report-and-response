@@ -4,6 +4,7 @@ const {
   updateUser,
   deleteUser,
   getUser,
+  authUser,
 } = require("../controllers/userController");
 
 const router = require("express").Router();
@@ -22,5 +23,8 @@ router.put("/:id", updateUser);
 
 // Delete User
 router.delete("/:id", deleteUser);
+
+// Auth User
+router.post("/auth", authUser);
 
 module.exports = router;

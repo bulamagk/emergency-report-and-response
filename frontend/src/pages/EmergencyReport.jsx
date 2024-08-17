@@ -1,32 +1,60 @@
 import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import logo from "../assets/emergency.jpg";
-import { FaUser } from "react-icons/fa";
 import ClientUnresolvedEmergencies from "../components/ClientUnresolvedEmergencies";
 import ClientResolvedEmergencies from "../components/ClientResolvedEmergencies";
 import ReportForm from "../components/ReportForm";
+import LogoutModal from "../components/LogoutModal";
+import { toast } from "react-toastify";
 
 const EmergencyReport = () => {
-  const [cordinates, setCordinates] = useState(null);
+  const navigate = useNavigate();
+
+  const user = useSelector((state) => state.clientAuthReducer.user);
+
+  const [location, setLocation] = useState({ lat: null, lon: null });
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [logout, setLogout] = useState(false);
 
   function handleClose() {
     setIsOpenModal((prev) => !prev);
   }
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+  function toggleLogout() {
+    setLogout((prev) => !prev);
+  }
 
-        setCordinates({ latitude, longitude });
-        console.log(cordinates);
-      },
-      (err) => {
-        alert("Please refresh page and allow access to your location!");
-      }
-    );
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+    }
   }, []);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        (error) => {
+          toast.error(`Error getting location: ${error.message}`);
+        }
+      );
+    } else {
+      toast.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
+
+  // UseEffect to log location whenever it changes
+  useEffect(() => {
+    if (location.lat && location.lon) {
+      console.log("Location updated:", location);
+    }
+  }, [location]);
 
   const data = [
     {
@@ -69,40 +97,48 @@ const EmergencyReport = () => {
   );
 
   return (
-    <section>
-      <header className="shadow-md">
-        <section className="container flex items-center justify-between py-4">
-          <img
-            width={50}
-            className="rounded-full aspect-square"
-            src={logo}
-            alt=""
-          />
-          <article className="cursor-pointer">
-            <FaUser className="text-stone-800" size={25} />
-          </article>
+    <>
+      <section>
+        <header className="shadow-md">
+          <section className="container flex items-center justify-between py-4">
+            <section className="flex items-center gap-4">
+              <img
+                width={50}
+                className="rounded-full aspect-square"
+                src={logo}
+                alt=""
+              />
+              <p className="font-bold opacity-70">{user?.name}</p>
+            </section>
+            <article className="cursor-pointer">
+              <button onClick={toggleLogout} className="bg-blue-600">
+                Logout
+              </button>
+            </article>
+          </section>
+        </header>
+        <section className="container min-h-[90dvh] flex flex-col justify-center">
+          <button
+            onClick={() => setIsOpenModal((prev) => !prev)}
+            className="w-full my-5 bg-red-500 font-extrabold text-xl"
+          >
+            Report An Emergency
+          </button>
+
+          {/* Render Unresolved Emergencies */}
+          {unResolvedEmergencies.length ? (
+            <ClientUnresolvedEmergencies emergencies={unResolvedEmergencies} />
+          ) : null}
+
+          {/* Render Resolved Emergencies */}
+          {resolvedEmergencies.length ? (
+            <ClientResolvedEmergencies emergencies={resolvedEmergencies} />
+          ) : null}
         </section>
-      </header>
-      <section className="container min-h-[90dvh] flex flex-col justify-center">
-        <button
-          onClick={() => setIsOpenModal((prev) => !prev)}
-          className="w-full my-5 bg-red-500 font-extrabold text-xl"
-        >
-          Report An Emergency
-        </button>
-
-        {/* Render Unresolved Emergencies */}
-        {unResolvedEmergencies.length ? (
-          <ClientUnresolvedEmergencies emergencies={unResolvedEmergencies} />
-        ) : null}
-
-        {/* Render Resolved Emergencies */}
-        {resolvedEmergencies.length ? (
-          <ClientResolvedEmergencies emergencies={resolvedEmergencies} />
-        ) : null}
+        {isOpenModal && <ReportForm handleClose={handleClose} />}
       </section>
-      {isOpenModal && <ReportForm handleClose={handleClose} />}
-    </section>
+      {logout && <LogoutModal toggleLogout={toggleLogout} user={"client"} />}
+    </>
   );
 };
 

@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { store } from "./app/store";
+import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import App from "./App";
@@ -12,6 +14,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import EmergencyReport from "./pages/EmergencyReport";
 import DashboardPage from "./pages/DashboardPage";
+import SingleEmergency from "./pages/SingleEmergency";
 
 const router = createBrowserRouter([
   {
@@ -39,8 +42,12 @@ const router = createBrowserRouter([
             element: <DashboardStat />,
           },
           {
-            path: "emergencies",
+            path: "emergencies/",
             element: <Emergencies />,
+          },
+          {
+            path: "emergencies/:id",
+            element: <SingleEmergency />,
           },
           {
             path: "resolved",
@@ -61,7 +68,9 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+  // <React.StrictMode>
+  <Provider store={store}>
     <RouterProvider router={router} />
-  </React.StrictMode>
+  </Provider>
+  // </React.StrictMode>
 );

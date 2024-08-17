@@ -1,9 +1,17 @@
 import { useState } from "react";
-import ErrorText from "./ErrorText";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { login } from "../features/clientAuthSlice";
+import { useDispatch } from "react-redux";
+
+const baseUrl = import.meta.env.VITE_SERVER_ADDRESS;
 
 const SignUp = ({ toggleSignUp }) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [isLoading, setIsloading] = useState(false);
-  const [errorText, setErrorText] = useState("");
 
   function handleClose() {
     toggleSignUp();
@@ -13,31 +21,27 @@ const SignUp = ({ toggleSignUp }) => {
     event.preventDefault();
 
     const form = event.target;
-
     const formData = new FormData(form);
-
     const data = Object.fromEntries(formData);
 
     // Send data to server
     setIsloading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await axios.post(`${baseUrl}/users`, data);
+      const resData = await response.data;
 
-      if (!response.ok) {
-        const errorPayload = await response.json();
-        setErrorText(errorPayload.message);
-        // console.log(errorPayload);
-        throw new Error(errorPayload.message);
-      }
+      // Set user
+      const user = {
+        email: resData.email,
+        name: `${resData.othername} ${resData.surname}`,
+      };
+      dispatch(login(user));
+
+      // Redirect user to emergency page
+      navigate("/emergency");
     } catch (error) {
-      console.log(error);
+      toast.error(error?.response?.data?.message);
     }
 
     setIsloading(false);
@@ -51,8 +55,6 @@ const SignUp = ({ toggleSignUp }) => {
             Close
           </button>
         </header>
-
-        {errorText && <ErrorText text={errorText} />}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <section className="form-group">

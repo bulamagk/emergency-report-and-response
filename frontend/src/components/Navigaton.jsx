@@ -1,14 +1,14 @@
 import {
   FaDashcube,
   FaFileMedical,
-  FaPlus,
+  FaAmbulance,
   FaUser,
   FaUsers,
   FaSignOutAlt,
 } from "react-icons/fa";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 
-const Navigaton = () => {
+const Navigaton = ({ toggleLogout }) => {
   return (
     <section className="bg-inherit p-4 px-2">
       <h2 className="text-5xl pl-4 text-blue-800 font-extrabold mb-4">
@@ -40,7 +40,7 @@ const Navigaton = () => {
             to="/dashboard/emergencies"
           >
             <span className="bg-blue-500 rounded">
-              <FaPlus className="m-2 text-white" size={14} />
+              <FaAmbulance className="m-2 text-white" size={14} />
             </span>
             Emergencies
           </NavLink>
@@ -83,19 +83,17 @@ const Navigaton = () => {
             </span>
             Profile
           </NavLink>
-          <NavLink
-            className={({ isActive }) =>
-              `flex items-center gap-2 p-4 rounded  text-sm hover:text-white hover:bg-blue-500 md:text-xl 
-            ${isActive ? "bg-blue-500 text-white" : "text-stone-800"}
-            `
-            }
-            to="/dashboars"
+          <Link
+            onClick={toggleLogout}
+            className="
+              flex items-center gap-2 p-4 rounded  text-sm text-stone-800 hover:text-white hover:bg-blue-500 md:text-xl 
+            "
           >
             <span className="bg-blue-500 rounded">
               <FaSignOutAlt className="m-2 text-white" size={14} />
             </span>
             Logout
-          </NavLink>
+          </Link>
         </li>
       </ul>
     </section>

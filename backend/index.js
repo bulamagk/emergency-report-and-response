@@ -1,5 +1,5 @@
 const express = require("express");
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -10,7 +10,7 @@ const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const PORT = process.env.PORT || 3001;
 
 const app = express();
-const io = new Server(app);
+// const io = new Server(app);
 
 // Middleware
 app.use(express.json());
@@ -32,8 +32,8 @@ app.use("/api/admin/users", adminUserRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-io.on("connection", (socket) => {
-  console.log("User Connected");
-});
+// io.on("connection", (socket) => {
+//   console.log("User Connected");
+// });
 
 connectDB(app, PORT);

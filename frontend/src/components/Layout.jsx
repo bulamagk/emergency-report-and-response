@@ -1,14 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { FaBars, FaBell } from "react-icons/fa";
 
 import Navigaton from "./Navigaton";
-const Dashboard = ({ children }) => {
+import LogoutModal from "./LogoutModal";
+
+const Layout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const asideRef = useRef();
   const overlayRef = useRef();
+
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  function toggleLogout() {
+    setIsLogoutModalOpen((prev) => !prev);
+  }
 
   useEffect(() => {
     asideRef.current.classList.remove("show");
@@ -30,11 +37,11 @@ const Dashboard = ({ children }) => {
         id="aside"
         className="bg-blue-50 transition-all duration-500 w-0 md:w-[20%]"
       >
-        <Navigaton />
+        <Navigaton toggleLogout={toggleLogout} />
       </aside>
 
-      <section className="bg-white flex-auto relative">
-        <header className="bg-white shadow p-4 w-full flex justify-between relative z-10">
+      <section className="bg-white min-h-full overflow-x-hidden overflow-y-auto flex-auto relative">
+        <header className="bg-white shadow p-4 w-full flex justify-between sticky inset-0 z-10">
           <section className="md:hidden">
             <FaBars
               onClick={handleMenuToggle}
@@ -64,11 +71,12 @@ const Dashboard = ({ children }) => {
         <section
           ref={overlayRef}
           onClick={handleMenuToggle}
-          className="hidden overlay absolute inset-0 from-black to-black md:hidden"
+          className="hidden overlay absolute inset-0 md:hidden"
         ></section>
       </section>
+      {isLogoutModalOpen && <LogoutModal toggleLogout={toggleLogout} />}
     </main>
   );
 };
 
-export default Dashboard;
+export default Layout;
