@@ -2,6 +2,7 @@ import { FaQuestionCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../features/clientAuthSlice";
+import { logout as adminLogout } from "../features/authSlice";
 
 const LogoutModal = ({ toggleLogout, user }) => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const LogoutModal = ({ toggleLogout, user }) => {
       navigate("/");
       dispatch(logout());
     } else {
+      dispatch(adminLogout());
       navigate("/admin");
     }
   }

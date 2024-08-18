@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { FaBars, FaBell } from "react-icons/fa";
 
@@ -7,6 +8,7 @@ import Navigaton from "./Navigaton";
 import LogoutModal from "./LogoutModal";
 
 const Layout = ({ children }) => {
+  const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
   const asideRef = useRef();
@@ -50,7 +52,7 @@ const Layout = ({ children }) => {
             />
           </section>
           <section>
-            <p className="text-stone-600">John Doe</p>
+            <p className="text-stone-600">{`${user.othername} ${user.surname}`}</p>
           </section>
           <section
             className="relative mr-4 my-1 cursor-pointer"
@@ -74,7 +76,9 @@ const Layout = ({ children }) => {
           className="hidden overlay absolute inset-0 md:hidden"
         ></section>
       </section>
-      {isLogoutModalOpen && <LogoutModal toggleLogout={toggleLogout} />}
+      {isLogoutModalOpen && (
+        <LogoutModal user="admin" toggleLogout={toggleLogout} />
+      )}
     </main>
   );
 };

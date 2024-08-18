@@ -1,8 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import emergencyPic from "../assets/emergency.jpg";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../features/authSlice";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import axios from "../api/axiosInstance";
+import Loader from "../components/Loader";
+
+const baseUrl = import.meta.env.VITE_SERVER_ADDRESS;
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
+
+  const [isLoading, setIsloading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -12,9 +24,28 @@ const Login = () => {
       password: formData.get("password"),
     };
 
-    console.log(loginCredentials);
-    navigate("/dashboard");
+    // Make a network call to login
+    setIsloading(true);
+    try {
+      const response = await axios.post(`/admin/users/login`, loginCredentials);
+      const resData = await response.data;
+      dispatch(login(resData));
+      setIsloading(false);
+
+      // Redirect user to emergency page
+      navigate("/dashboard");
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
+    }
+    setIsloading(false);
   }
+
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, []);
+
   return (
     <section className="min-h-[100vh] w-full md:flex md:flex-col md:justify-center">
       <section className="container pt-6 grid grid-cols-1 gap-4 h-full md:grid-cols-2">
@@ -38,8 +69,19 @@ const Login = () => {
               <input type="password" name="password" id="password" required />
             </section>
             <section className="form-group">
-              <button className="bg-blue-800 hover:bg-blue-950" type="submit">
-                Sign In
+              <button
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 bg-blue-800 hover:bg-blue-950"
+                type="submit"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader />
+                    <span>Please wait</span>
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </button>
             </section>
           </form>

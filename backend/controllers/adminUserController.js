@@ -53,7 +53,9 @@ const createUser = async (req, res) => {
 // Get Users*******************************************************************
 const getUsers = async (req, res) => {
   try {
-    const users = await AdminUser.find({}, { password: 0 });
+    const users = await AdminUser.find({}, { password: 0 }).sort({
+      createdAt: -1,
+    });
     return res.status(200).json(users);
   } catch (error) {
     return res
@@ -79,8 +81,25 @@ const getUser = async (req, res) => {
 };
 // Update Users****************************************************************
 const updateUser = async (req, res) => {
+  const { email, phone } = req.body;
   const { id } = req.params;
   try {
+    // Check email
+    const emailExist = await AdminUser.findOne({ email });
+    if (emailExist._id != id) {
+      return res
+        .status(409)
+        .json({ message: `User with email [${email}] already exist!` });
+    }
+
+    // Check phone
+    const phoneExist = await AdminUser.findOne({ phone });
+    if (phoneExist._id != id) {
+      return res
+        .status(409)
+        .json({ message: `User with phone number [${phone}] already exist!` });
+    }
+
     const user = await AdminUser.findById(id);
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
@@ -94,6 +113,7 @@ const updateUser = async (req, res) => {
     );
 
     const updatedUserData = {
+      id,
       surname: updatedUser.surname,
       othername: updatedUser.othername,
       email: updatedUser.email,
@@ -192,7 +212,7 @@ const login = async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV == "production" ? true : false,
         maxAge: 30 * 24 * 60 * 60 * 1000,
-        sameSite: "strict",
+        sameSite: "lax",
       });
 
       const user = {

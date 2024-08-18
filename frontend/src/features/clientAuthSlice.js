@@ -15,7 +15,6 @@ const clientUserSlice = createSlice({
       state.user = action.payload;
 
       // Save user in local storage
-      console.log(action.payload);
       localStorage.setItem("clientUser", JSON.stringify(action.payload));
     },
     logout: (state) => {

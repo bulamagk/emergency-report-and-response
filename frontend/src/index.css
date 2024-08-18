@@ -49,6 +49,10 @@ label {
   background: rgba(0, 0, 0, 0.5);
 }
 
+.overlay.bg-transparent {
+  background: rgba(0, 0, 0, 0.144);
+}
+
 @layer components {
   .form-group {
     @apply flex flex-col gap-2;
