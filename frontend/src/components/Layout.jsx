@@ -1,14 +1,68 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import axios from "../api/axiosInstance";
+import socketIO from "socket.io-client";
+
+import emergencyAlarm from "../assets/loud-emergency-alarm.mp3";
 
 import { FaBars, FaBell } from "react-icons/fa";
 
 import Navigaton from "./Navigaton";
 import LogoutModal from "./LogoutModal";
+import { toast } from "react-toastify";
 
 const Layout = ({ children }) => {
+  const emergencyAlert = useRef();
+  const [emergencySound, setEmergencySound] = useState(false);
+
   const user = useSelector((state) => state.auth.user);
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/admin");
+      toast.error("Please sign");
+    }
+  }, []);
+
+  // Test alert
+  function alertSound() {
+    if (emergencyAlert.current) {
+      emergencyAlert.current.play();
+    }
+  }
+
+  if (emergencySound) {
+    alertSound();
+  } else {
+    if (emergencyAlert.current) {
+      emergencyAlert.current.pause();
+      emergencyAlert.current.currentTime = 0;
+    }
+  }
+
+  // Initialize IO
+  const io = socketIO("http://localhost:3001");
+
+  // Fetch pending emergencies
+  useEffect(() => {
+    async function getPendingEmergencies() {
+      try {
+        const response = await axios.get("/emergencies");
+        if (response) {
+          const data = await response.data;
+          console.log(data);
+          setData(data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    getPendingEmergencies();
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
   const asideRef = useRef();
@@ -32,6 +86,18 @@ const Layout = ({ children }) => {
     asideRef.current.classList.toggle("show");
     overlayRef.current.classList.toggle("hidden");
   }
+
+  // Join socket room on login
+  io.on("connect", () => {
+    io.emit("joinAdminsRoom", "admin");
+  });
+
+  // Listen for new emergency
+  io.on("newEmergency", (emergency) => {
+    console.log(emergency);
+    setEmergencySound(true);
+  });
+
   return (
     <main className="bg-slate-50 flex overflow-hidden h-[100dvh]">
       <aside
@@ -52,20 +118,33 @@ const Layout = ({ children }) => {
             />
           </section>
           <section>
-            <p className="text-stone-600">{`${user.othername} ${user.surname}`}</p>
+            <p className="text-stone-600">{`${user?.othername} ${user?.surname}`}</p>
           </section>
           <section
             className="relative mr-4 my-1 cursor-pointer"
             onClick={handleNotificationClick}
           >
             <FaBell className="text-blue-500 text-2xl" />
-            <span
-              className="absolute -top-3 left-4 w-6 flex justify-center items-center bg-red-500 text-white text-xs
+
+            {data?.length ? (
+              <span
+                className="absolute -top-3 left-4 w-6 flex justify-center items-center bg-red-500 text-white text-xs
             p-1 rounded-full"
-            >
-              5
-            </span>
+              >
+                {data.length}
+              </span>
+            ) : (
+              ""
+            )}
           </section>
+          {/* Emergency Alert */}
+          <audio
+            className="hidden"
+            ref={emergencyAlert}
+            src={emergencyAlarm}
+            loop
+            controls
+          ></audio>
         </header>
         <section id="page" className="p-4">
           {children}

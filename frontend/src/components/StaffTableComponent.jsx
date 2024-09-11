@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 
 const StaffTableComponent = ({ data, deleteStaff }) => {
+  const [staffId, setStaffId] = useState(null);
   //   Delete Staff
   async function handleDelete(id) {
-    console.log(id);
+    deleteStaff(id);
   }
 
   // Column Definitions

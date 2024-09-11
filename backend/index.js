@@ -1,5 +1,6 @@
 const express = require("express");
-// const { Server } = require("socket.io");
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -10,7 +11,15 @@ const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const PORT = process.env.PORT || 3001;
 
 const app = express();
-// const io = new Server(app);
+
+// Create an HTTP server for Socket.io
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:3001", "http://localhost:5173"],
+    credentials: true,
+  },
+});
 
 // Middleware
 const allowedOrigins = ["http://localhost:3001", "http://localhost:5173"];
@@ -35,6 +44,14 @@ app.use(cookieParser());
 // Routes imports
 const userRoutes = require("./routes/userRoutes");
 const adminUserRoutes = require("./routes/adminUserRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const emergencyRoutes = require("./routes/emergencyRoutes");
+
+// Make io available in every request
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 // Routes
 app.get("/", (req, res) => {
@@ -42,12 +59,22 @@ app.get("/", (req, res) => {
 });
 app.use("/api/users", userRoutes);
 app.use("/api/admin/users", adminUserRoutes);
+app.use("/api", dashboardRoutes);
+app.use("/api", emergencyRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
-// io.on("connection", (socket) => {
-//   console.log("User Connected");
-// });
+io.on("connection", (socket) => {
+  // Reporter user join room
+  socket.on("joinReporterRoom", (userId) => {
+    socket.join(userId);
+  });
 
-connectDB(app, PORT);
+  // Admin user join room
+  socket.on("joinAdminsRoom", (admin) => {
+    socket.join(admin);
+  });
+});
+
+connectDB(server, PORT);

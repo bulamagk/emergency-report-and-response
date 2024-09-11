@@ -22,24 +22,10 @@ const emergencyReportSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      maxlength: 500, // Maximum length for description
     },
-    location: {
-      type: {
-        type: String,
-        enum: ["Point"],
-        required: true,
-      },
-      coordinates: {
-        type: [Number],
-        required: true,
-        validate: {
-          validator: function (v) {
-            return v.length === 2;
-          },
-          message: (props) => `${props.value} is not a valid coordinate pair!`,
-        },
-      },
+    coordinates: {
+      lat: String,
+      lon: String,
     },
     status: {
       type: String,
@@ -53,7 +39,6 @@ const emergencyReportSchema = new mongoose.Schema(
 );
 
 // Add indexes
-emergencyReportSchema.index({ location: "2dsphere" });
 emergencyReportSchema.index({ status: 1 });
 
 // Pre-save hook to check if the user exists

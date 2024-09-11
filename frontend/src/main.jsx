@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import EmergencyReport from "./pages/EmergencyReport";
 import DashboardPage from "./pages/DashboardPage";
 import SingleEmergency from "./pages/SingleEmergency";
+import ErrorPage from "./pages/ErrorPage";
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,7 @@ const router = createBrowserRouter([
         ],
       },
     ],
+    errorElement: <ErrorPage />,
   },
 ]);
 

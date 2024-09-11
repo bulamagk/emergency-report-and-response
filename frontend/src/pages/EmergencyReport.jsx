@@ -7,15 +7,23 @@ import ClientResolvedEmergencies from "../components/ClientResolvedEmergencies";
 import ReportForm from "../components/ReportForm";
 import LogoutModal from "../components/LogoutModal";
 import { toast } from "react-toastify";
+import { BallTriangle } from "react-loader-spinner";
+import axios from "../api/axiosInstance";
+import socketIO from "socket.io-client";
 
 const EmergencyReport = () => {
   const navigate = useNavigate();
+
+  // Initialize IO
+  const io = socketIO("http://localhost:3001");
 
   const user = useSelector((state) => state.clientAuthReducer.user);
 
   const [location, setLocation] = useState({ lat: null, lon: null });
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [logout, setLogout] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
 
   function handleClose() {
     setIsOpenModal((prev) => !prev);
@@ -23,6 +31,34 @@ const EmergencyReport = () => {
 
   function toggleLogout() {
     setLogout((prev) => !prev);
+  }
+
+  // Report emergency function
+  async function reportEmergency(type, description) {
+    const data = {
+      user: user.id,
+      type,
+      description,
+      coordinates: location,
+    };
+
+    setIsReporting((prev) => !prev);
+
+    try {
+      const response = await axios.post(`/emergencies`, data);
+
+      if (response) {
+        const resData = await response.data;
+        console.log(resData);
+
+        setIsOpenModal((prev) => !prev);
+      }
+    } catch (error) {
+      alert(error);
+      toast.error(error?.response?.data?.message);
+    } finally {
+      setIsReporting((prev) => !prev);
+    }
   }
 
   useEffect(() => {
@@ -56,45 +92,43 @@ const EmergencyReport = () => {
     }
   }, [location]);
 
-  const data = [
-    {
-      id: 1,
-      type: "Medical",
-      description: "In need of an urgent assistant from you",
-      status: "Resolved",
-      date: "12-12-24",
-    },
-    {
-      id: 2,
-      type: "Fire",
-      description: "In need of an urgent assistant from you",
-      status: "Dispatched",
-      date: "12-12-24",
-    },
-    {
-      id: 3,
-      type: "Accident",
-      description: "In need of an urgent assistant from you",
-      status: "Resolved",
-      date: "12-12-24",
-    },
-    {
-      id: 4,
-      type: "Natural Disaster",
-      description: "In need of an urgent assistant from you",
-      status: "Pending",
-      date: "12-12-24",
-    },
-  ];
-  const [emergencies, setEmergencies] = useState(data);
+  // Fetch user emergencies
+  useEffect(() => {
+    async function fetchEmergencies() {
+      try {
+        const response = await axios.get(`/emergencies?user=${user.id}`);
+        const resData = await response.data;
 
-  const unResolvedEmergencies = emergencies.filter(
-    (emergency) => emergency.status !== "Resolved"
-  );
+        console.log("My Emergencies: ", resData);
+        if (resData.length) {
+          alert("Emergencies fetched");
+        }
+      } catch (error) {
+        alert(error);
+        toast.error(error?.response?.data?.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
-  const resolvedEmergencies = emergencies.filter(
-    (emergency) => emergency.status == "Resolved"
-  );
+    fetchEmergencies();
+  }, []);
+
+  // Join socket room on login
+  io.on("connect", () => {
+    io.emit("joinReporterRoom", user.id);
+  });
+
+  // Listen for io event from the server
+  io.on("test", (data) => alert(data));
+
+  if (isLoading) {
+    return (
+      <section className="overlay bg-transparent text-blue-600 flex items-center justify-center absolute inset-0">
+        <BallTriangle color="dodgerblue" />
+      </section>
+    );
+  }
 
   return (
     <>
@@ -126,16 +160,22 @@ const EmergencyReport = () => {
           </button>
 
           {/* Render Unresolved Emergencies */}
-          {unResolvedEmergencies.length ? (
+          {[].length ? (
             <ClientUnresolvedEmergencies emergencies={unResolvedEmergencies} />
           ) : null}
 
           {/* Render Resolved Emergencies */}
-          {resolvedEmergencies.length ? (
+          {[].length ? (
             <ClientResolvedEmergencies emergencies={resolvedEmergencies} />
           ) : null}
         </section>
-        {isOpenModal && <ReportForm handleClose={handleClose} />}
+        {isOpenModal && (
+          <ReportForm
+            handleClose={handleClose}
+            reportEmergency={reportEmergency}
+            isReporting={isReporting}
+          />
+        )}
       </section>
       {logout && <LogoutModal toggleLogout={toggleLogout} user={"client"} />}
     </>

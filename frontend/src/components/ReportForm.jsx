@@ -1,6 +1,14 @@
 import React from "react";
 
-const ReportForm = ({ handleClose }) => {
+const ReportForm = ({ handleClose, reportEmergency, isReporting }) => {
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    const formdata = new FormData(event.target);
+    const data = Object.fromEntries(formdata);
+
+    reportEmergency(data.emergency, data.description);
+  }
   return (
     <section className="overlay absolute inset-0">
       <article className="container bg-white p-8 mt-8 rounded-sm block mx-auto  w-full md:w-2/3 lg:w-1/3">
@@ -15,7 +23,7 @@ const ReportForm = ({ handleClose }) => {
             Close
           </button>
         </header>
-        <form className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <section className="form-group">
             <label htmlFor="emergency">Select emergency case</label>
             <select className="p-4 rounded-sm" name="emergency" id="emergency">
@@ -40,8 +48,12 @@ const ReportForm = ({ handleClose }) => {
             ></textarea>
           </section>
           <section className="form-group">
-            <button className="bg-blue-800 hover:bg-blue-950" type="submit">
-              Report
+            <button
+              disabled={isReporting}
+              className="bg-blue-800 hover:bg-blue-950"
+              type="submit"
+            >
+              {isReporting ? "Reporting, please wait" : "Report"}
             </button>
           </section>
         </form>

@@ -11,7 +11,7 @@ const verfiryToken = async (req, res, next) => {
 
       next();
     } catch (error) {
-      return res.json({ message: error.message });
+      return res.status(401).json({ message: error.message });
     }
   } else {
     return res.status(401).json({ message: "You are not authorized" });

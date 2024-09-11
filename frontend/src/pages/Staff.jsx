@@ -5,16 +5,29 @@ import { BallTriangle } from "react-loader-spinner";
 import { toast } from "react-toastify";
 import axios from "../api/axiosInstance";
 import RegisterStaffComponent from "../components/RegisterStaffComponet";
+import { useNavigate } from "react-router-dom";
 
 const Staff = () => {
-  const [data, setData] = useState(null);
+  const navigate = useNavigate();
+
+  const [data, setData] = useState([]);
   const [isRegisterModal, setIsRegisterModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Delete staff
   async function deleteStaff(id) {
-    console.log(id);
+    setIsLoading((prev) => !prev);
+    try {
+      const response = await axios.delete(`/admin/users/${id}`);
+      const resData = await response.data;
+      toast.success(resData.message);
+      const newData = data.filter((user) => user._id !== id);
+      setData(newData);
+    } catch (error) {
+    } finally {
+    }
+    setIsLoading((prev) => !prev);
   }
 
   //   Fetch Staff
@@ -26,7 +39,11 @@ const Staff = () => {
 
         setData(resData);
       } catch (error) {
-        toast.error(error.response.data.message);
+        if (error.response.status == 401) {
+          toast.error("Please sign in");
+          navigate("/admin");
+        }
+        toast.error(error?.response?.data?.message);
       } finally {
         setIsLoading(false);
       }
@@ -54,7 +71,12 @@ const Staff = () => {
           Register Staff
         </button>
       </section>
-      <StaffTableComponent data={data} />
+      <StaffTableComponent
+        data={data}
+        deleteStaff={deleteStaff}
+        loading={loading}
+        setLoading={setIsLoading}
+      />
       {isRegisterModal ? (
         <RegisterStaffComponent
           setIsRegisterModal={setIsRegisterModal}

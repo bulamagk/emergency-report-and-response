@@ -24,7 +24,7 @@ const Login = () => {
       password: formData.get("password"),
     };
 
-    // Make a network call to login
+    // Make a api call to login
     setIsloading(true);
     try {
       const response = await axios.post(`/admin/users/login`, loginCredentials);
@@ -35,7 +35,11 @@ const Login = () => {
       // Redirect user to emergency page
       navigate("/dashboard");
     } catch (error) {
-      toast.error(error?.response?.data?.message);
+      if (!error.response) {
+        toast.error(error.message);
+      } else {
+        toast.error(error?.response?.data?.message);
+      }
     }
     setIsloading(false);
   }

@@ -1,11 +1,11 @@
 import React from "react";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 
-const PieChartComponent = () => {
+const PieChartComponent = (props) => {
   const data = [
-    { name: "Pending Emergencies", value: 400 },
-    { name: "Dispatched Emergencies", value: 300 },
-    { name: "Resolved", value: 300 },
+    { name: "Pending Emergencies", value: props.pendingEmergencies },
+    { name: "Dispatched Emergencies", value: props.dispatchedEmergencies },
+    { name: "Resolved", value: props.resolvedEmergencies },
   ];
 
   const COLORS = ["#EE0000", "#FFBB28", "#00C49F"];

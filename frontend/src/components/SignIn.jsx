@@ -37,6 +37,7 @@ const SignIn = ({ toggleSignIn }) => {
 
       // Set user
       const user = {
+        id: resData._id,
         email: resData.email,
         name: `${resData.othername} ${resData.surname}`,
       };
@@ -46,7 +47,12 @@ const SignIn = ({ toggleSignIn }) => {
       // Redirect user to emergency page
       navigate("/emergency");
     } catch (error) {
-      toast.error(error?.response?.data?.message);
+      console.log(error);
+      if (error.response.status == 500) {
+        toast.error(error?.response?.statusText);
+      } else if (error.message) {
+        toast.error(error?.response?.data?.message);
+      }
     }
     setIsloading(false);
   }

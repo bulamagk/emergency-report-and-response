@@ -33,6 +33,7 @@ const SignUp = ({ toggleSignUp }) => {
 
       // Set user
       const user = {
+        id: resData._id,
         email: resData.email,
         name: `${resData.othername} ${resData.surname}`,
       };
