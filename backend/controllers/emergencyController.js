@@ -69,8 +69,33 @@ const getEmergency = async (req, res) => {
   }
 };
 
+// Update Emergency Status
+const updateEmergencyStatus = async (req, res) => {
+  const { id, userId, status } = req.body;
+
+  if (!(id && userId && status)) {
+    return res.status(400).json("Please enter all required fields");
+  }
+
+  try {
+    await Emergency.findByIdAndUpdate(id, { status });
+
+    // Emergency Update IO notification
+    const io = req.io;
+    const updateData = { id, status };
+    io.to(userId).emit("emergencyUpdate", updateData);
+
+    return res.status(200).json(updateData);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: `Error Occured \n\n ${error.message}` });
+  }
+};
+
 module.exports = {
   reportEmergency,
   getEmergencies,
   getEmergency,
+  updateEmergencyStatus,
 };

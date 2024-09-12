@@ -1,28 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { updateEmergency } from "../features/emergencySlice";
+
 import { Link } from "react-router-dom";
 import { FaArrowCircleLeft, FaClock } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import MapComponent from "../components/MapComponent";
+import axios from "../api/axiosInstance";
 
 const SingleEmergency = () => {
+  const dispatch = useDispatch();
   const { id } = useParams();
-  const location = { lat: 9.081999, lon: 8.675277 };
-  const [emergency, setEmergency] = useState({
-    id: 3,
-    type: "Medical",
-    status: "Dispatched",
-    description: "There is an emergency case I need your assistance",
-    data: "12-06-2024",
-  });
 
-  function handleStatusChange(event) {
+  const [emergency, setEmergency] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    async function fetchEmergency() {
+      try {
+        const response = await axios.get(`/emergencies/${id}`);
+        if (response) {
+          const emergency = await response.data;
+          setEmergency(emergency);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading((prev) => !prev);
+      }
+    }
+
+    fetchEmergency();
+  }, []);
+
+  async function handleStatusChange(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const status = formData.get("status");
 
     if (!status) return;
 
-    console.log(status);
+    const data = { id: emergency._id, userId: emergency.user._id, status };
+
+    setIsUpdating((prev) => !prev);
+    try {
+      const response = await axios.put(`/emergencies/`, data);
+      if (response) {
+        const emergency = await response.data;
+
+        // Update store
+        dispatch(updateEmergency({ id, status }));
+
+        // Update this page UI
+        setEmergency((prev) => ({ ...prev, status }));
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsUpdating((prev) => !prev);
+    }
+  }
+
+  if (loading) {
+    return (
+      <>
+        <p>Loading...</p>
+      </>
+    );
   }
 
   return (
@@ -46,15 +91,17 @@ const SingleEmergency = () => {
           </p>
           <p className="text-xl my-3 mb-6 text-stone-800">
             <span className="font-bold">Type: </span>
-            <span>Medical</span>
+            <span>{emergency.type}</span>
           </p>
           <p className="flex items-center gap-2 text-xl my-3 text-stone-800">
             <span className="font-bold">Status: </span>
             <span
               className={`flex items-center gap-2 p-2 ${
-                emergency.status == "Pending"
+                emergency.status === "Pending"
                   ? "text-red-500"
-                  : "text-yellow-600"
+                  : emergency.status === "Dispatched"
+                  ? "text-yellow-600"
+                  : "text-green-600"
               }`}
             >
               <FaClock /> {emergency.status}
@@ -75,20 +122,19 @@ const SingleEmergency = () => {
               </select>
             </section>
             <section className="form-group my-2">
-              <button className="bg-blue-500 md:w-1/2" type="submit">
-                Update
+              <button
+                disabled={isUpdating}
+                className="bg-blue-500 md:w-1/2"
+                type="submit"
+              >
+                {isUpdating ? "Updating, please wait" : "Update"}
               </button>
             </section>
           </form>
           {/* End Emergency Update Form */}
           <section className="text-xl my-3 text-stone-800">
             <span className="font-bold">Description: </span> <br />
-            <p className="text-justify">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur
-              inventore, sint voluptate natus reiciendis minima sequi possimus
-              repellat molestiae ratione, iure neque. Numquam debitis labore
-              consequatur, non repudiandae officia quod.
-            </p>
+            <p className="text-justify">{emergency.description}</p>
           </section>
         </section>
         <section id="reporterInfo" className="flex-1">
@@ -97,20 +143,22 @@ const SingleEmergency = () => {
           </p>
           <p className="text-xl my-3 text-stone-800">
             <span className="font-bold">Full Name: </span>
-            <span>Peter Bulama</span>
+            <span>
+              {emergency.user.othername} {emergency.user.surname}
+            </span>
           </p>
           <p className="text-xl my-3 text-stone-800">
             <span className="font-bold">Phone Number: </span>
-            <span>08102325688</span>
+            <span>{`0${emergency.user.phone}`}</span>
           </p>
           <p className="text-xl my-3 text-stone-800">
             <span className="font-bold">Email: </span>
-            <span>bulamagk@gmail.com</span>
+            <span>{emergency.user.email}</span>
           </p>
         </section>
       </section>
 
-      <MapComponent location={location} />
+      <MapComponent location={emergency.coordinates} />
     </section>
   );
 };

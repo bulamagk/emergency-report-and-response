@@ -1,11 +1,13 @@
 import { FaClock, FaCheckCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-const NewClientEmergency = ({ id, type, description, date }) => {
+const NewClientEmergency = ({ _id, type, description, status, date }) => {
   return (
     <Link
-      to={`/dashboard/emergencies/${id}`}
-      className="shadow-md p-4 rounded-md bg-red-600"
+      to={`/dashboard/emergencies/${_id}`}
+      className={`shadow-md p-4 rounded-md ${
+        status == "Pending" ? "bg-red-400" : "bg-yellow-500"
+      }`}
     >
       <section className="flex justify-between items-center mb-4 text-white">
         <h4 className="text-white font-bold md:text-2xl">{type} Emergency</h4>

@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+
+import { useSelector, useDispatch } from "react-redux";
+import { setEmergency } from "../features/clientEmergencySlice";
+
 import axios from "../api/axiosInstance";
 import socketIO from "socket.io-client";
 
@@ -13,11 +16,12 @@ import LogoutModal from "./LogoutModal";
 import { toast } from "react-toastify";
 
 const Layout = ({ children }) => {
+  const dispatch = useDispatch();
+  const emergencies = useSelector((state) => state.emergency);
+
   const emergencyAlert = useRef();
-  const [emergencySound, setEmergencySound] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
-  const [data, setData] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -26,14 +30,14 @@ const Layout = ({ children }) => {
     }
   }, []);
 
-  // Test alert
+  // Alert sound
   function alertSound() {
     if (emergencyAlert.current) {
       emergencyAlert.current.play();
     }
   }
 
-  if (emergencySound) {
+  if (emergencies.length) {
     alertSound();
   } else {
     if (emergencyAlert.current) {
@@ -45,22 +49,21 @@ const Layout = ({ children }) => {
   // Initialize IO
   const io = socketIO("http://localhost:3001");
 
-  // Fetch pending emergencies
+  // Fetch  emergencies
   useEffect(() => {
-    async function getPendingEmergencies() {
+    async function getEmergencies() {
       try {
         const response = await axios.get("/emergencies");
         if (response) {
           const data = await response.data;
-          console.log(data);
-          setData(data);
+          dispatch(setEmergency(data));
         }
       } catch (error) {
         console.log(error);
       }
     }
 
-    getPendingEmergencies();
+    getEmergencies();
   }, []);
 
   const navigate = useNavigate();
@@ -126,12 +129,12 @@ const Layout = ({ children }) => {
           >
             <FaBell className="text-blue-500 text-2xl" />
 
-            {data?.length ? (
+            {emergencies?.length ? (
               <span
                 className="absolute -top-3 left-4 w-6 flex justify-center items-center bg-red-500 text-white text-xs
             p-1 rounded-full"
               >
-                {data.length}
+                {emergencies.length}
               </span>
             ) : (
               ""

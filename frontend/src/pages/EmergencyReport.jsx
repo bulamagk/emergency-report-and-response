@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+import { useSelector, useDispatch } from "react-redux";
+import {
+  setEmergency,
+  newEmergency,
+  updateEmergency,
+} from "../features/clientEmergencySlice";
+
 import logo from "../assets/emergency.jpg";
 import ClientUnresolvedEmergencies from "../components/ClientUnresolvedEmergencies";
 import ClientResolvedEmergencies from "../components/ClientResolvedEmergencies";
 import ReportForm from "../components/ReportForm";
 import LogoutModal from "../components/LogoutModal";
+
 import { toast } from "react-toastify";
 import { BallTriangle } from "react-loader-spinner";
 import axios from "../api/axiosInstance";
@@ -13,11 +21,13 @@ import socketIO from "socket.io-client";
 
 const EmergencyReport = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Initialize IO
   const io = socketIO("http://localhost:3001");
 
   const user = useSelector((state) => state.clientAuthReducer.user);
+  const emergencies = useSelector((state) => state.clientEmergency);
 
   const [location, setLocation] = useState({ lat: null, lon: null });
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -50,7 +60,7 @@ const EmergencyReport = () => {
       if (response) {
         const resData = await response.data;
         console.log(resData);
-
+        dispatch(newEmergency(resData));
         setIsOpenModal((prev) => !prev);
       }
     } catch (error) {
@@ -99,9 +109,9 @@ const EmergencyReport = () => {
         const response = await axios.get(`/emergencies?user=${user.id}`);
         const resData = await response.data;
 
-        console.log("My Emergencies: ", resData);
+        // console.log("My Emergencies: ", resData);
         if (resData.length) {
-          alert("Emergencies fetched");
+          dispatch(setEmergency(resData));
         }
       } catch (error) {
         alert(error);
@@ -119,8 +129,10 @@ const EmergencyReport = () => {
     io.emit("joinReporterRoom", user.id);
   });
 
-  // Listen for io event from the server
-  io.on("test", (data) => alert(data));
+  // Listen for emergencyio event from the server
+  io.on("emergencyUpdate", (data) => {
+    dispatch(updateEmergency(data));
+  });
 
   if (isLoading) {
     return (
@@ -160,13 +172,13 @@ const EmergencyReport = () => {
           </button>
 
           {/* Render Unresolved Emergencies */}
-          {[].length ? (
-            <ClientUnresolvedEmergencies emergencies={unResolvedEmergencies} />
+          {emergencies?.length ? (
+            <ClientUnresolvedEmergencies data={emergencies} />
           ) : null}
 
           {/* Render Resolved Emergencies */}
-          {[].length ? (
-            <ClientResolvedEmergencies emergencies={resolvedEmergencies} />
+          {emergencies.length ? (
+            <ClientResolvedEmergencies data={emergencies} />
           ) : null}
         </section>
         {isOpenModal && (

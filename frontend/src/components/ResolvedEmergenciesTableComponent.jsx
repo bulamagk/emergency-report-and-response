@@ -14,7 +14,8 @@ const ResolvedEmergenciesTableComponent = ({ data }) => {
     },
     {
       name: "Reported By",
-      selector: (row) => `0${row.user.email}`,
+      selector: (row) =>
+        `${row.user.othername} ${row.user.surname} | ${row.user.email} | ${row.user.phone}`,
     },
 
     {

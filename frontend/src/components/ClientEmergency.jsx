@@ -1,6 +1,18 @@
 import { FaClock, FaCheckCircle } from "react-icons/fa";
 
-const ClientEmergency = ({ id, type, description, status, date }) => {
+const ClientEmergency = (props) => {
+  const { _id, type, description, status, createdAt } = props.emergency;
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    // Format the date to "Month day, year"
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+
   return (
     <section
       className={`shadow p-4 rounded-sm ${
@@ -25,7 +37,9 @@ const ClientEmergency = ({ id, type, description, status, date }) => {
         </section>
       </section>
       <p className="mb-4 text-stone-700 md:text-2xl">{description}</p>
-      <p className="text-sm opacity-75 md:text-xl">{date}</p>
+      <p className="text-sm opacity-55 mt-4 md:text-xl">
+        {formatDate(createdAt)}
+      </p>
     </section>
   );
 };

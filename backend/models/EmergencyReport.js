@@ -16,6 +16,7 @@ const emergencyReportSchema = new mongoose.Schema(
         "Natural Disaster",
         "Accident",
         "Robbery",
+        "Security",
         "Other",
       ],
       required: true,

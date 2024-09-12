@@ -10,8 +10,8 @@ const MapComponent = ({ location }) => {
   };
 
   const center = {
-    lat: location.lat,
-    lng: location.lon,
+    lat: Number(location.lat),
+    lng: Number(location.lon),
   };
 
   return (
