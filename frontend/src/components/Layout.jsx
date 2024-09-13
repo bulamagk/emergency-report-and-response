@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
-import { setEmergency } from "../features/clientEmergencySlice";
+import { setEmergency, newEmergency } from "../features/clientEmergencySlice";
 
 import axios from "../api/axiosInstance";
 import socketIO from "socket.io-client";
@@ -47,7 +47,7 @@ const Layout = ({ children }) => {
   }
 
   // Initialize IO
-  const io = socketIO("http://localhost:3001");
+  const io = socketIO(import.meta.env.VITE_SERVER_IO);
 
   // Fetch  emergencies
   useEffect(() => {
@@ -97,8 +97,8 @@ const Layout = ({ children }) => {
 
   // Listen for new emergency
   io.on("newEmergency", (emergency) => {
-    console.log(emergency);
-    setEmergencySound(true);
+    // Add new emergency to state
+    dispatch(newEmergency(emergency));
   });
 
   return (

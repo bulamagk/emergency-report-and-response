@@ -40,7 +40,7 @@ const getDashboardChart = async (req, res) => {
 
     // Dispatch Emergencies
     const dispatchedEmergencies = await Emergency.find({
-      status: "Resolved",
+      status: "Dispatched",
     }).countDocuments();
 
     return res.status(200).json({

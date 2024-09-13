@@ -12,17 +12,19 @@ const PORT = process.env.PORT || 3001;
 
 const app = express();
 
+const allowedOrigins = String(process.env.ALLOWED_ORIGINS).split(" ");
+// const allowedOrigins = ["http://localhost:3001", "http://localhost:5173"];
+
 // Create an HTTP server for Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3001", "http://localhost:5173"],
+    origin: allowedOrigins,
     credentials: true,
   },
 });
 
 // Middleware
-const allowedOrigins = ["http://localhost:3001", "http://localhost:5173"];
 
 const corsOptions = {
   origin: function (origin, callback) {

@@ -13,7 +13,13 @@ const emergencySlice = createSlice({
       state.push(...unresolvedEmergencies);
     },
     newEmergency: (state, action) => {
-      state.push(action.payload);
+      // Check if the emergency already exists before adding it
+      const exists = state.find(
+        (emergency) => emergency._id === action.payload._id
+      );
+      if (!exists) {
+        state.push(action.payload);
+      }
     },
     updateEmergency: (state, action) => {
       if (action.payload.status === "Resolved") {

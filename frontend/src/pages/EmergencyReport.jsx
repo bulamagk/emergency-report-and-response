@@ -24,7 +24,7 @@ const EmergencyReport = () => {
   const dispatch = useDispatch();
 
   // Initialize IO
-  const io = socketIO("http://localhost:3001");
+  const io = socketIO(import.meta.env.VITE_SERVER_IO);
 
   const user = useSelector((state) => state.clientAuthReducer.user);
   const emergencies = useSelector((state) => state.clientEmergency);

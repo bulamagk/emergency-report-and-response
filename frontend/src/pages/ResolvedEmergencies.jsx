@@ -15,7 +15,6 @@ const ResolvedEmergencies = () => {
         if (response) {
           const data = await response.data;
           setData(data);
-          console.log(data);
         }
       } catch (error) {
         console.log(error);

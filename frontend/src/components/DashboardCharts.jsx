@@ -13,7 +13,6 @@ const DashboardCharts = () => {
         const response = await axios.get("/dashboard-chart");
         const data = await response.data;
         setChartStat(data);
-        // console.log(data);
       } catch (error) {
         console.log(error);
       } finally {
